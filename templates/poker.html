@@ -1,0 +1,511 @@
+<html lang="en">
+
+<head>
+    <title>Agile Poker {{ title }}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://kit.fontawesome.com/a28c0ff06b.js" crossorigin="anonymous"></script>
+    <link href=' http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <style data-href="/styles.23c2608f591eada2b6c9.css" data-identity="gatsby-global-css">
+        body,
+        html {
+            background-color: #f0f0f0;
+        }
+
+        html {
+            font-size: 62.5%;
+            height: 100%;
+            height: -webkit-fill-available;
+            min-width: 100%;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #1a2935;
+            font-family: Roboto;
+            font-size: 1.8rem;
+            line-height: 1.3em;
+            margin: 0;
+        }
+
+        .pageTitle {
+            width: 100%;
+            text-align: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            background-color: #2fa2d3;
+            color: white;
+
+        }
+
+        /*---------- Cards ----------*/
+        .card {
+            align-items: center;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            background: #fff;
+            border: 2px solid #2fa2d3;
+            border-radius: 0.9rem;
+            color: #2fa2d3;
+            display: flex;
+            font-size: 15px;
+            height: 6rem;
+            width: 4rem;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.1s linear;
+        }
+
+        .card.selectable:hover {
+            background-color: #ebf4ff;
+            margin-top: -0.25rem;
+        }
+
+        .card.selected {
+            background-color: #ebf4ff;
+            margin-top: -0.25rem;
+        }
+
+        .card:disabled {
+            cursor: not-allowed;
+            color: #a3a3a3;
+            border: 2px solid #a3a3a3;
+            pointer-events: none;
+        }
+
+        /*---------- Card List ----------*/
+
+        .cardsList {
+            list-style: none;
+            margin: 0;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 1.6rem;
+            text-align: center;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .cardsList .cardItem {
+            display: inline-block;
+            margin: 0 0.8rem;
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        .cardsContainer {
+            position: absolute;
+            bottom: 5%;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card.selectable {
+            cursor: pointer;
+        }
+
+        /*---------- Labels ----------*/
+        .label {
+            font-size: 1.8rem;
+            margin: 0 0 0.8rem;
+            min-width: 48rem;
+            text-align: center;
+        }
+
+        /*---------- Player Selector ----------*/
+        .player {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-evenly;
+            max-width: 100%;
+            perspective: 10rem;
+            perspective-origin: bottom;
+        }
+
+        .playerName {
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            align-items: center;
+            display: flex;
+            display: -webkit-box;
+            font-size: 1.4rem;
+            font-weight: 700;
+            justify-content: center;
+            line-height: 1.2em;
+            overflow: hidden;
+            padding-top: 0.8rem;
+            text-align: center;
+            width: 8rem;
+        }
+
+        .card.playerCard {
+            border-radius: 0.8rem;
+            flex-shrink: 0;
+            height: 12rem;
+            width: 8rem;
+            cursor: default;
+            font-size: 30px;
+        }
+
+        .card.playerCard.emptyCard {
+            background: #e8e9ea;
+            border: none;
+        }
+
+
+        .playerContainersContainer {
+            z-index: 2;
+            align-items: stretch;
+            grid-area: bottom;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .playerContainer {
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+
+
+        .playersOverContainer {
+            margin: 0;
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            -ms-transform: translate(-50%, -70%);
+            transform: translate(-50%, -70%);
+            cursor: default;
+        }
+
+        /* ---------- Action Buttons ----------*/
+        .buttonsContainer {
+            width: 120px;
+            padding: 20px;
+            padding-top: 15px;
+        }
+
+        .label.actionsLabel {
+            text-align: left;
+            font-size: 17px;
+            padding-left: 20px
+        }
+
+        .actionButton {
+            border: none;
+            background-color: inherit;
+            padding: 14px 28px;
+            font-size: 25px;
+            cursor: pointer;
+            display: inline-block;
+            color: #2fa2d3;
+            margin-right: 10;
+            margin-left: 10;
+            padding: 0;
+        }
+
+        .actionButton:hover {
+            margin-top: -0.25rem;
+        }
+
+        /* ---------- Action Buttons ----------*/
+        .modal {
+            display: block;
+            /*Show the modal on start*/
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 30%;
+            border-radius: 0.9rem;
+        }
+
+        .modalHeaderText {
+            font-weight: normal;
+            text-align: center;
+        }
+
+        .modalInput {
+            margin-left: 5%;
+            margin-right: 5%;
+            width: 90%;
+            height: 50px;
+            font-size: 20px;
+            padding-left: 15px;
+            padding-right: 15px;
+            border-radius: 0.9rem;
+            border: 1px solid #bebebe;
+        }
+
+        .modalInput:focus {
+            outline: none;
+        }
+
+        .modalButton {
+            text-align: center;
+            width: 30%;
+            margin-left: 35%;
+            margin-top: 20px;
+            background-color: #2fa2d3;
+            border: none;
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-radius: 0.9rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 class="pageTitle">Agile Poker</h2>
+    <div class="buttonsContainer">
+        <div class="label actionsLabel">Actions</div>
+        <button title="Show / Hide Cards" id="show" class="actionButton" onclick="showButton()">
+            <i id="eyeIcon" class="far fa-eye"></i>
+        </button>
+        <button title="Clear Cards" id="clear" class="actionButton" onclick="clearButton(this)">
+            <i class="fas fa-times-circle"></i>
+        </button>
+    </div>
+    <div id="playersOverContainer" class="playersOverContainer">
+        <div id="playersContainer" class="playerContainersContainer"></div>
+    </div>
+
+    <div class="cardsContainer">
+
+        <div class="label">Choose a card</div>
+
+        <ul class="cardsList">
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">0</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">1</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">2</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">3</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">5</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">8</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">13</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">21</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">34</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">55</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">89</button>
+            </li>
+            <li class="cardItem"><button onclick="handleButton(this)" class="card selectable">144</button>
+            </li>
+        </ul>
+    </div>
+    <!-- The Modal -->
+    <div id="userModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <h3 class="modalHeaderText">Enter Display Name</h3>
+            <input type="text" autofocus class="modalInput" id="userNameInput" placeholder="Display Name" />
+            <button id="userModalSubmitButton" class="modalButton" onclick="getPlayerName(); closeModal();">Let's
+                Go</button>
+        </div>
+
+    </div>
+
+</body>
+<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
+    integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
+    crossorigin="anonymous"></script>
+<script>
+    // Player Information
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var name = "";
+    var myId = Math.floor(Math.random() * 100000);
+
+    // Classes
+    const emptyText = "";
+    const emptyClass = "card playerCard emptyCard";
+    const fullClass = "card playerCard cardValue";
+    const selectableCardButtonsClass = "card selectable";
+    const selectedCardButtonsClass = "card selected";
+
+    // First get the player's name from the modal
+    function getPlayerName() {
+        let person = document.getElementById("userNameInput").value;
+        document.getElementById("userNameInput").value = "";
+        name = person !== null && person !== "" ? person : "Anonymous";
+
+        createPlayer(myId, name, "");
+        socket.emit("addPlayer", {
+            id: myId,
+            name: name,
+            value: "",
+        });
+    }
+
+
+    // Handle card button presses
+    function handleButton(element) {
+        // Update UI
+        updateSelectedCard(element.innerText);
+
+        // Post the value to the backend
+        postNameAndValue(element.innerText);
+    }
+
+    // Handle clear button press
+    function clearButton(element) {
+        socket.emit("clearValues");
+    }
+
+    // Function to toggle whether the selection cards are disabled for the user
+    function setDisabledCards(isDisabled) {
+        var selectableCards = document.getElementsByClassName(selectableCardButtonsClass);
+        for (var card of selectableCards) {
+            card.disabled = isDisabled;
+        }
+
+        var selectedCards = document.getElementsByClassName(selectedCardButtonsClass);
+        for (var card of selectedCards) {
+            card.disabled = isDisabled;
+        }
+
+        // Determine what the icon should be for the show action
+        document.getElementById("eyeIcon").className = isDisabled ? "far fa-eye-slash" : "far fa-eye"
+    }
+
+    // Update which card has been selected for the user
+    function updateSelectedCard(value) {
+        var selectedCards = document.getElementsByClassName(selectedCardButtonsClass);
+        for (var card of selectedCards) {
+            card.className = selectableCardButtonsClass;
+        }
+        // Update the UI
+        var elements = document.getElementsByClassName(selectableCardButtonsClass);
+        for (var item of elements) {
+            if (item.innerHTML === value) {
+                item.className = selectedCardButtonsClass;
+            }
+        }
+    }
+
+    // Show a specific button
+    function showButton() {
+        socket.emit("showValues");
+    }
+
+    // Post the name and value to the server
+    function postNameAndValue(value) {
+        socket.emit("addPlayerValues", {
+            id: myId,
+            name: name,
+            value: value
+        });
+    }
+
+    // Deal with getting the player values details
+    socket.on("playerValues", async function getPlayerValues(json) {
+        var newPlayersContainer = document.createElement("div");
+        newPlayersContainer.className = "playerContainersContainer";
+        newPlayersContainer.id = "playersContainer";
+
+        var isShowingValues = false;
+
+        // Iterate over the response, set the value if the id exists, otherwise create a new user
+        for (const [key, value] of Object.entries(JSON.parse(json))) {
+            var elem = document.getElementById(key);
+
+            if (value['value'] !== "" && value['value'] !== "?") {
+                isShowingValues = true;
+            }
+
+            newPlayersContainer.appendChild(createPlayer(key, value["name"], value["value"]));
+        }
+        var playersOverContainer = document.getElementById("playersOverContainer");
+        playersOverContainer.innerHTML = "";
+        playersOverContainer.appendChild(newPlayersContainer);
+
+        // Disable the buttons if the buttons are being shown
+        setDisabledCards(isShowingValues);
+    });
+
+    // Remove the player from the server if possible - this is also handled on the backend if this is not possible
+    window.onbeforeunload = function (e) {
+        socket.emit("removePlayer", {
+            id: myId
+        });
+    };
+
+    // Create the UI for a specific player
+    function createPlayer(id, name, value) {
+        var playerContainer = document.createElement("div");
+        playerContainer.className = "playerContainer";
+
+        var player = document.createElement("div");
+        player.className = "player";
+
+        var card = document.createElement("div");
+        card.id = id;
+        card.className = value !== "" ? fullClass : emptyClass;
+        card.innerHTML = value;
+
+        var playerNameElement = document.createElement("div");
+        playerNameElement.className = "playerName";
+        playerNameElement.innerHTML = id === myId.toString() ? name + " (me)" : name;
+
+        player.appendChild(card);
+        player.appendChild(playerNameElement);
+        playerContainer.appendChild(player);
+        playersContainer.appendChild(playerContainer);
+
+        // Update the selectable cards if it is my id and there is no value
+        if (id === myId.toString() && value === "") {
+            updateSelectedCard(value);
+        }
+
+        return playerContainer
+    }
+</script>
+<script>
+    /* ----- Modal Script ----- */
+    var modal = document.getElementById("userModal");
+
+    function closeModal() {
+        modal.style.display = "none";
+    }
+
+    // On pressing enter in the name input, press the button
+    document.getElementById("userNameInput")
+        .addEventListener("keyup", function (event) {
+            event.preventDefault();
+            if (event.keyCode === 13) {
+                document.getElementById("userModalSubmitButton").click();
+            }
+        });
+</script>
+
+</html>
