@@ -216,6 +216,12 @@
             margin-top: -0.25rem;
         }
 
+        .actionButton:disabled {
+            cursor: not-allowed;
+            color: #a3a3a3;
+            pointer-events: none;
+        }
+
         /* ---------- Action Buttons ----------*/
         .modal {
             display: block;
@@ -398,6 +404,13 @@
         document.getElementById("eyeIcon").className = isDisabled ? "far fa-eye-slash" : "far fa-eye"
     }
 
+    // Set whether the action buttons are disabled
+    function areActionButtonsDisabled(isDisabled) {
+        // Disable
+        document.getElementById("show").disabled = isDisabled;
+        document.getElementById("clear").disabled = isDisabled;
+    }
+
     // Update which card has been selected for the user
     function updateSelectedCard(value) {
         var selectedCards = document.getElementsByClassName(selectedCardButtonsClass);
@@ -434,13 +447,15 @@
         newPlayersContainer.id = "playersContainer";
 
         var isShowingValues = false;
+        var areAnyValues = false;
 
         // Iterate over the response, set the value if the id exists, otherwise create a new user
         for (const [key, value] of Object.entries(JSON.parse(json))) {
-            var elem = document.getElementById(key);
-
-            if (value['value'] !== "" && value['value'] !== "?") {
-                isShowingValues = true;
+            if (value['value'] !== "") {
+                areAnyValues = true;
+                if (value['value'] !== "?") {
+                    isShowingValues = true;
+                }
             }
 
             newPlayersContainer.appendChild(createPlayer(key, value["name"], value["value"]));
@@ -449,8 +464,10 @@
         playersOverContainer.innerHTML = "";
         playersOverContainer.appendChild(newPlayersContainer);
 
-        // Disable the buttons if the buttons are being shown
         setDisabledCards(isShowingValues);
+
+        // If there are no values, disable the action buttons
+        areActionButtonsDisabled(!areAnyValues);
     });
 
     // Remove the player from the server if possible - this is also handled on the backend if this is not possible
