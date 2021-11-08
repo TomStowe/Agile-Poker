@@ -75,7 +75,16 @@ def postPlayerValues():
 @socketio.on("showValues")
 def toggleShowValues(methods=["POST"]):
     global showValues
-    showValues = not showValues
+    
+    # If there are no values, don't toggle
+    hasValue = False
+    for value in playerValues.values():
+        if (value["value"] != ""):
+            hasValue = True
+    
+    if (hasValue):
+        showValues = not showValues
+    
     postPlayerValues()
 
 # Clear all of the values
