@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://kit.fontawesome.com/a28c0ff06b.js" crossorigin="anonymous"></script>
     <link href=' http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
-    <style data-href="/styles.23c2608f591eada2b6c9.css" data-identity="gatsby-global-css">
+    <style>
         body,
         html {
             background-color: #f0f0f0;
@@ -42,20 +42,20 @@
 
         /*---------- Cards ----------*/
         .card {
-            align-items: center;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            background: #fff;
-            border: 2px solid #2fa2d3;
-            border-radius: 0.9rem;
             color: #2fa2d3;
-            display: flex;
-            font-size: 15px;
             height: 6rem;
             width: 4rem;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 0.9rem;
+            border: 2px solid #2fa2d3;
+            display: flex;
+            font-size: 15px;
             justify-content: center;
-            overflow: hidden;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
             transition: all 0.1s linear;
+            overflow: hidden;
         }
 
         .card.selectable:hover {
@@ -131,19 +131,18 @@
         }
 
         .playerName {
+            align-items: center;
+            justify-content: center;
+            padding-top: 0.6rem;
+            text-align: center;
+            width: 10rem;
+            line-height: 1.3em;
+            font-size: 1.6rem;
+            font-weight: 700;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            align-items: center;
             display: flex;
             display: -webkit-box;
-            font-size: 1.4rem;
-            font-weight: 700;
-            justify-content: center;
-            line-height: 1.2em;
-            overflow: hidden;
-            padding-top: 0.8rem;
-            text-align: center;
-            width: 8rem;
         }
 
         .card.playerCard {
