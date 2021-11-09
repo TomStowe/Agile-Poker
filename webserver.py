@@ -112,10 +112,12 @@ def removePlayer(json, methods=["POST"]):
 # Handle a player disconnecting from the server
 @socketio.on("disconnect")
 def disconnectedPlayer():
-    id = sidToUserId[request.sid]
-    playerValues.pop(id)
-    sidToUserId.pop(request.sid)
-    postPlayerValues()
+    # If the sid exists in the sidToUserId mapping, remove the player
+    if (request.sid in sidToUserId):
+        id = sidToUserId[request.sid]
+        playerValues.pop(id)
+        sidToUserId.pop(request.sid)
+        postPlayerValues()
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app, host="0.0.0.0", port=80, debug=True)

@@ -11,6 +11,10 @@
         body,
         html {
             background-color: #f0f0f0;
+            -webkit-user-select: none;
+            -moz-user-select: -moz-none;
+            -ms-user-select: none;
+            user-select: none
         }
 
         html {
@@ -37,7 +41,7 @@
             padding-bottom: 20px;
             background-color: #2fa2d3;
             color: white;
-
+            cursor: default;
         }
 
         /*---------- Cards ----------*/
@@ -347,7 +351,7 @@
     crossorigin="anonymous"></script>
 <script>
     // Player Information
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
     var name = "";
     var myId = Math.floor(Math.random() * 100000);
 
