@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, send_from_directory
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 import json, copy, os
 
 # Setup the webserver
@@ -7,8 +7,8 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "kjdsfkdhsvuven3434"
 socketio = SocketIO(app)
 
-# The values of the game
-playerValues = {}
+# The values of the game - dictionary of rooms, with dictionary of player values
+playerValuesOfRooms = {}
 # An mapping between the sids from the socket and the user ids used in the `playerValues` object
 sidToUserId = {}
 showValues = False
@@ -21,8 +21,14 @@ def favicon():
 
 # Serve the homepage
 @app.route("/")
-def page():
-    name = request.args.get("n")
+def homePage():
+    return render_template("home.html")
+
+# Serve the specific room page
+@app.route("/room/<roomId>")
+def roomPage(roomId):
+    print(roomId)
+    name = request.args.get("room")
 
     if (name == None):
         name = ""
@@ -35,11 +41,18 @@ def page():
 @socketio.on("addPlayer")
 def addPlayer(json, methods=["POST"]):
     id = json["id"]
+    roomId = json["roomId"]
     name = json["name"]
     value = ""
     sidToUserId[request.sid] = id
-    playerValues[id] = {"name": name, "value": value}
-    postPlayerValues()
+    
+    # If the room doesn't exist, create it
+    if (not roomId in playerValuesOfRooms):
+        playerValuesOfRooms[roomId] = {}
+    
+    playerValuesOfRooms[roomId][id] = {"name": name, "value": value}
+    join_room(roomId)
+    postPlayerValues(roomId)
 
     return "OK"
 
@@ -51,16 +64,28 @@ def addPlayerValues(json, methods=["POST"]):
         return
 
     id = json["id"]
+    roomId = json["roomId"]
     name = json["name"]
     value = json["value"]
-    playerValues[id] = {"name": name, "value": value}
+    
+    # If the room doesn't exist, create it
+    if (not roomId in playerValuesOfRooms):
+        playerValuesOfRooms[roomId] = {}
+    
+    playerValuesOfRooms[roomId][id] = {"name": name, "value": value}
 
-    postPlayerValues()
+    postPlayerValues(roomId)
 
     return "OK"
 
 # Post the player values to all clients on the socket
-def postPlayerValues():
+def postPlayerValues(roomId):
+    # If the room doesn't exist, create it
+    if (playerValuesOfRooms[roomId] == None):
+        playerValuesOfRooms[roomId] = {}
+    
+    playerValues = playerValuesOfRooms[roomId]
+    
     outValues = copy.deepcopy(playerValues)
     global showValues
 
@@ -69,44 +94,68 @@ def postPlayerValues():
         for value in outValues.values():
             value["value"] = "?" if value["value"] != "" else ""
 
-    socketio.emit("playerValues", json.dumps(outValues))
+    socketio.emit("playerValues", json.dumps(outValues), to=roomId)
 
 # Set whether the values should be shown, or whether the ? should be shown
 @socketio.on("showValues")
-def toggleShowValues(methods=["POST"]):
+def toggleShowValues(json, methods=["POST"]):
     global showValues
+    
+    roomId = json["roomId"]
+    
+    # If the room doesn't exist, create it
+    if (not roomId in playerValuesOfRooms):
+        playerValuesOfRooms[roomId] = {}
     
     # If there are no values, don't toggle
     hasValue = False
-    for value in playerValues.values():
+    for value in playerValuesOfRooms[roomId].values():
         if (value["value"] != ""):
             hasValue = True
     
     if (hasValue):
         showValues = not showValues
     
-    postPlayerValues()
+    postPlayerValues(roomId)
 
 # Clear all of the values
 @socketio.on("clearValues")
-def clearValues(methods=["POST"]):
+def clearValues(json, methods=["POST"]):
     global showValues
+    
+    roomId = json["roomId"]
+    
+    # If the room doesn't exist, create it
+    if (not roomId in playerValuesOfRooms):
+        playerValuesOfRooms[roomId] = {}
 
-    for v in playerValues.values():
+    for v in playerValuesOfRooms[roomId].values():
         v["value"] = ""
     
     showValues = False
 
-    postPlayerValues()
+    postPlayerValues(roomId)
     return "OK"
 
 # Remove a player from the the game state
 @socketio.on("removePlayer")
 def removePlayer(json, methods=["POST"]):
     id = json["id"]
-    playerValues.pop(id)
+    roomId = json["roomId"]
+    
+    # If the room doesn't exist, create it
+    if (not roomId in playerValuesOfRooms):
+        playerValuesOfRooms[roomId] = {}
+    
+    playerValuesOfRooms[roomId].pop(id)
+    
+    # If there are no other users in the room, remove the room
+    if (len(playerValuesOfRooms[roomId]) == 0):
+        playerValuesOfRooms.pop(roomId)
+    
+    leave_room(roomId)
 
-    postPlayerValues()
+    postPlayerValues(roomId)
     return "OK"
 
 # Handle a player disconnecting from the server
@@ -115,9 +164,18 @@ def disconnectedPlayer():
     # If the sid exists in the sidToUserId mapping, remove the player
     if (request.sid in sidToUserId):
         id = sidToUserId[request.sid]
-        playerValues.pop(id)
+        
+        # Find the room id
+        for (roomId, values) in playerValuesOfRooms.items():
+            if (id in values.keys()):
+                break
+            
+        if (roomId != None):
+            return
+            
+        playerValuesOfRooms[roomId].pop(id)
         sidToUserId.pop(request.sid)
-        postPlayerValues()
+        postPlayerValues(roomId)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=80, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

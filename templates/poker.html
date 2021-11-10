@@ -287,7 +287,7 @@
 </head>
 
 <body>
-    <h2 class="pageTitle">Agile Poker</h2>
+    <h2 id="pageTitle" class="pageTitle"></h2>
     <div class="buttonsContainer">
         <div class="label actionsLabel">Actions</div>
         <button title="Show / Hide Cards" id="show" class="actionButton" onclick="showButton()">
@@ -350,8 +350,21 @@
     integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
     crossorigin="anonymous"></script>
 <script>
+    /* ----- Window Setup Script ----- */
+    var roomName = window.location.pathname.split('/').at(-1);
+
+    // Capitalise the start of every word in the sentence
+    roomName = roomName.split("%20").map((word) => {
+        return word[0].toUpperCase() + word.substring(1);
+    }).join(" ");
+
+    document.getElementById("pageTitle").innerHTML = "Agile Poker - " + roomName;
+    document.title = "Agile Poker - " + roomName;
+
+</script>
+<script>
     // Player Information
-    var socket = io.connect('https://' + document.domain + ':' + location.port);
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
     var name = "";
     var myId = Math.floor(Math.random() * 100000);
 
@@ -371,6 +384,7 @@
         createPlayer(myId, name, "");
         socket.emit("addPlayer", {
             id: myId,
+            roomId: roomName,
             name: name,
             value: "",
         });
@@ -388,7 +402,7 @@
 
     // Handle clear button press
     function clearButton(element) {
-        socket.emit("clearValues");
+        socket.emit("clearValues", { roomId: roomName });
     }
 
     // Function to toggle whether the selection cards are disabled for the user
@@ -431,13 +445,14 @@
 
     // Show a specific button
     function showButton() {
-        socket.emit("showValues");
+        socket.emit("showValues", { roomId: roomName });
     }
 
     // Post the name and value to the server
     function postNameAndValue(value) {
         socket.emit("addPlayerValues", {
             id: myId,
+            roomId: roomName,
             name: name,
             value: value
         });
@@ -476,7 +491,8 @@
     // Remove the player from the server if possible - this is also handled on the backend if this is not possible
     window.onbeforeunload = function (e) {
         socket.emit("removePlayer", {
-            id: myId
+            id: myId,
+            roomId: roomName,
         });
     };
 
