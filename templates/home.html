@@ -1,7 +1,7 @@
 <html lang="en">
 
 <head>
-    <title>Agile Poker - Home</title>
+    <title>Agile Poker</title>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -122,12 +122,9 @@
     </div>
 
 </body>
-<script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
-    integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
-    crossorigin="anonymous"></script>
 <script>
     function getRoomName() {
-        var outputValue = document.getElementById("roomNameInput").value.replace(/ /g, '%20');
+        var outputValue = document.getElementById("roomNameInput").value.replace("/", "").replace(/ /g, '%20');
 
         // If there is no name, make up a random name
         if (outputValue === "") {
