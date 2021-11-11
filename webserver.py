@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, send_from_directory
 from flask_socketio import SocketIO, join_room, leave_room
+from socketio import WSGIApp
 import json, copy, os
 
 # Setup the webserver
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "kjdsfkdhsvuven3434"
 socketio = SocketIO(app, async_mode='eventlet')
+wsgiApp = WSGIApp(socketio)
 
 # The values of the game - dictionary of rooms, with dictionary of player values
 playerValuesOfRooms = {}

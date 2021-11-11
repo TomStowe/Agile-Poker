@@ -8,8 +8,6 @@ A web application to aid estimating the costing of creating projects in teams us
 2. Replace the protocol for the `io.connect` constructor method if `http` is needed (~`poker.html:345`)
 3. Run the webserver using `python3 webserver.py`
 
-**Note: If deploying the webapp, a WSGI server is needed.** Read more [here](https://flask.palletsprojects.com/en/2.0.x/deploying/index.html)
-
 ## 🎓 Licence
 This software is released under the [GNU AGPLv3](LICENSE) licence
 
