@@ -6,7 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://kit.fontawesome.com/a28c0ff06b.js" crossorigin="anonymous"></script>
-    <link href=' http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+    <link href=' https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <style>
         body,
         html {
@@ -364,7 +364,8 @@
 </script>
 <script>
     // Player Information
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    const connectSocket = () => io.connect('https://' + document.domain + ':' + location.port)
+    var socket = connectSocket();
     var name = "";
     var myId = Math.floor(Math.random() * 100000);
 
@@ -490,7 +491,7 @@
 
     // Remove the player from the server if possible - this is also handled on the backend if this is not possible
     window.onbeforeunload = function (e) {
-        socket.emit("removePlayer", {
+        connectSocket().emit("removePlayer", {
             id: myId,
             roomId: roomName,
         });

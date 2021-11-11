@@ -5,7 +5,7 @@ import json, copy, os
 # Setup the webserver
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "kjdsfkdhsvuven3434"
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='eventlet')
 
 # The values of the game - dictionary of rooms, with dictionary of player values
 playerValuesOfRooms = {}
@@ -27,7 +27,6 @@ def homePage():
 # Serve the specific room page
 @app.route("/room/<roomId>")
 def roomPage(roomId):
-    print(roomId)
     name = request.args.get("room")
 
     if (name == None):
@@ -81,7 +80,7 @@ def addPlayerValues(json, methods=["POST"]):
 # Post the player values to all clients on the socket
 def postPlayerValues(roomId):
     # If the room doesn't exist, create it
-    if (playerValuesOfRooms[roomId] == None):
+    if (not roomId in playerValuesOfRooms):
         playerValuesOfRooms[roomId] = {}
     
     playerValues = playerValuesOfRooms[roomId]
@@ -140,42 +139,30 @@ def clearValues(json, methods=["POST"]):
 # Remove a player from the the game state
 @socketio.on("removePlayer")
 def removePlayer(json, methods=["POST"]):
-    id = json["id"]
-    roomId = json["roomId"]
-    
-    # If the room doesn't exist, create it
-    if (not roomId in playerValuesOfRooms):
-        playerValuesOfRooms[roomId] = {}
-    
-    playerValuesOfRooms[roomId].pop(id)
-    
-    # If there are no other users in the room, remove the room
-    if (len(playerValuesOfRooms[roomId]) == 0):
-        playerValuesOfRooms.pop(roomId)
-    
-    leave_room(roomId)
-
-    postPlayerValues(roomId)
-    return "OK"
+    removePlayerFromRoom(request.sid)
 
 # Handle a player disconnecting from the server
 @socketio.on("disconnect")
 def disconnectedPlayer():
-    # If the sid exists in the sidToUserId mapping, remove the player
-    if (request.sid in sidToUserId):
-        id = sidToUserId[request.sid]
+    removePlayerFromRoom(request.sid)
+    
+
+def removePlayerFromRoom(sid):
+# If the sid exists in the sidToUserId mapping, remove the player
+    if (sid in sidToUserId):
+        id = sidToUserId[sid]
         
         # Find the room id
         for (roomId, values) in playerValuesOfRooms.items():
             if (id in values.keys()):
                 break
-            
-        if (roomId != None):
+
+        if (roomId == None):
             return
             
         playerValuesOfRooms[roomId].pop(id)
-        sidToUserId.pop(request.sid)
+        sidToUserId.pop(sid)
         postPlayerValues(roomId)
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=80, debug=True)
