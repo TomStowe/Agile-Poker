@@ -13,7 +13,7 @@ wsgiApp = WSGIApp(socketio)
 playerValuesOfRooms = {}
 # An mapping between the sids from the socket and the user ids used in the `playerValues` object
 sidToUserId = {}
-showValues = False
+showForRoom = {}
 
 # Get the favicon
 @app.route('/favicon.ico')
@@ -49,7 +49,7 @@ def addPlayer(json, methods=["POST"]):
     
     # If the room doesn't exist, create it
     if (not roomId in playerValuesOfRooms):
-        playerValuesOfRooms[roomId] = {}
+        createRoom(roomId)
     
     playerValuesOfRooms[roomId][id] = {"name": name, "value": value}
     join_room(roomId)
@@ -60,18 +60,19 @@ def addPlayer(json, methods=["POST"]):
 # Socket connection for adding the values for a player
 @socketio.on("addPlayerValues")
 def addPlayerValues(json, methods=["POST"]):
-    # If showing, don't allow change
-    if (showValues):
-        return
-
     id = json["id"]
     roomId = json["roomId"]
     name = json["name"]
     value = json["value"]
-    
+
     # If the room doesn't exist, create it
     if (not roomId in playerValuesOfRooms):
-        playerValuesOfRooms[roomId] = {}
+        createRoom(roomId)
+
+    # If showing the values for the room, don't allow change
+    if (showForRoom[roomId]):
+        return
+    
     
     playerValuesOfRooms[roomId][id] = {"name": name, "value": value}
 
@@ -83,15 +84,15 @@ def addPlayerValues(json, methods=["POST"]):
 def postPlayerValues(roomId):
     # If the room doesn't exist, create it
     if (not roomId in playerValuesOfRooms):
-        playerValuesOfRooms[roomId] = {}
+        createRoom(roomId)
     
     playerValues = playerValuesOfRooms[roomId]
     
     outValues = copy.deepcopy(playerValues)
-    global showValues
+    global showForRoom
 
     # Hide values if necessary
-    if (not showValues):
+    if (not showForRoom[roomId]):
         for value in outValues.values():
             value["value"] = "?" if value["value"] != "" else ""
 
@@ -100,13 +101,13 @@ def postPlayerValues(roomId):
 # Set whether the values should be shown, or whether the ? should be shown
 @socketio.on("showValues")
 def toggleShowValues(json, methods=["POST"]):
-    global showValues
+    global showForRoom
     
     roomId = json["roomId"]
     
     # If the room doesn't exist, create it
     if (not roomId in playerValuesOfRooms):
-        playerValuesOfRooms[roomId] = {}
+        createRoom(roomId)
     
     # If there are no values, don't toggle
     hasValue = False
@@ -115,25 +116,25 @@ def toggleShowValues(json, methods=["POST"]):
             hasValue = True
     
     if (hasValue):
-        showValues = not showValues
+        showForRoom[roomId] = not showForRoom[roomId]
     
     postPlayerValues(roomId)
 
 # Clear all of the values
 @socketio.on("clearValues")
 def clearValues(json, methods=["POST"]):
-    global showValues
+    global showForRoom
     
     roomId = json["roomId"]
     
     # If the room doesn't exist, create it
     if (not roomId in playerValuesOfRooms):
-        playerValuesOfRooms[roomId] = {}
+        createRoom(roomId)
 
     for v in playerValuesOfRooms[roomId].values():
         v["value"] = ""
     
-    showValues = False
+    showForRoom[roomId] = False
 
     postPlayerValues(roomId)
     return "OK"
@@ -148,6 +149,9 @@ def removePlayer(json, methods=["POST"]):
 def disconnectedPlayer():
     removePlayerFromRoom(request.sid)
     
+def createRoom(roomId):
+    playerValuesOfRooms[roomId] = {}
+    showForRoom[roomId] = False
 
 def removePlayerFromRoom(sid):
 # If the sid exists in the sidToUserId mapping, remove the player
