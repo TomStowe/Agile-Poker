@@ -149,12 +149,21 @@ def removePlayer(json, methods=["POST"]):
 def disconnectedPlayer():
     removePlayerFromRoom(request.sid)
     
+# Display the rooms to the console
+def displayRooms():
+    outString = ""
+    for k in playerValuesOfRooms.keys():
+        outString += k + ","
+    outString += "\t"*3
+    print("Rooms: " + outString, end="\r")
+    
 def createRoom(roomId):
     playerValuesOfRooms[roomId] = {}
     showForRoom[roomId] = False
+    displayRooms()
 
 def removePlayerFromRoom(sid):
-# If the sid exists in the sidToUserId mapping, remove the player
+    # If the sid exists in the sidToUserId mapping, remove the player
     if (sid in sidToUserId):
         id = sidToUserId[sid]
         
@@ -167,8 +176,13 @@ def removePlayerFromRoom(sid):
             return
             
         playerValuesOfRooms[roomId].pop(id)
-        sidToUserId.pop(sid)
+        sidToUserId.pop(sid)        
         postPlayerValues(roomId)
+        
+        if (len(playerValuesOfRooms[roomId]) == 0):
+            playerValuesOfRooms.pop(roomId)
+        
+        displayRooms()
 
 if __name__ == "__main__":
     socketio.run(app, host="0.0.0.0", port=80, debug=True, log_output=False)
